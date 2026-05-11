@@ -1,410 +1,231 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import BackgroundFX from "@/components/BackgroundFX";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import HeroSilhouette from "@/components/HeroSilhouette";
+import DashboardNav from "@/components/DashboardNav";
+import MobileTabBar from "@/components/MobileTabBar";
+import HologramBody from "@/components/HologramBody";
+import {
+  ProgressionCard,
+  CaloriesCard,
+  WorkoutsCard,
+  LevelCard,
+} from "@/components/dashboard/StatCards";
+import {
+  MuscleAnalysisCard,
+  HeartRateCard,
+  PerformanceCard,
+  NextWorkoutCard,
+} from "@/components/dashboard/AnalysisCards";
+
+/* =====================================================
+   Données démo + lecture sessionStorage (résultats analyse)
+   ===================================================== */
+
+const DEMO = {
+  level: 28,
+  levelLabel: "ATHLÈTE",
+  xp: 6100,
+  xpMax: 7500,
+  progression: 78,
+  calories: 2450,
+  caloriesGoal: 3000,
+  workouts: 18,
+  bpm: 72,
+  performance: 86,
+  nextWorkout: {
+    name: "PUSH",
+    muscles: ["Pectoraux", "Épaules", "Triceps"],
+  },
+};
+
+function deriveFromProgram(program) {
+  if (!program) return DEMO;
+  const m = program.metrics;
+  const firstTrain = program.week?.find?.((d) => d.type === "train");
+  const muscles = firstTrain
+    ? firstTrain.title.split("·").slice(1).join("·").trim().split(/\s*·\s*/)
+    : DEMO.nextWorkout.muscles;
+  const workoutCount = program.week?.filter?.((d) => d.type === "train").length || DEMO.workouts;
+  return {
+    level: Math.max(1, Math.round(m.score / 3.5)),
+    levelLabel: program.physicalLevel?.label?.toUpperCase() || DEMO.levelLabel,
+    xp: Math.round(m.score * 75),
+    xpMax: 7500,
+    progression: m.score,
+    calories: m.targetCalories,
+    caloriesGoal: m.tdee + 500,
+    workouts: workoutCount,
+    bpm: 72,
+    performance: m.score,
+    nextWorkout: {
+      name: firstTrain?.title?.split("·")[0]?.trim() || DEMO.nextWorkout.name,
+      muscles: muscles.length ? muscles : DEMO.nextWorkout.muscles,
+    },
+  };
+}
 
 export default function Home() {
+  const [data, setData] = useState(DEMO);
+  const [hasReal, setHasReal] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("neurex_program");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setData(deriveFromProgram(parsed));
+        setHasReal(true);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
   return (
     <>
       <BackgroundFX />
-      <Navbar />
+      <DashboardNav level={data.level} label={data.levelLabel} />
 
-      <main className="relative flex-1">
-        {/* ===================== HERO ===================== */}
-        <section className="relative mx-auto max-w-7xl px-5 sm:px-6 md:px-10 pt-12 sm:pt-16 md:pt-24 pb-20">
-          {/* Glow géant derrière le titre */}
-          <div className="absolute -top-20 left-0 right-0 h-[500px] pointer-events-none">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,217,255,0.18),transparent_60%)] blur-3xl" />
+      <main className="relative flex-1 pb-24 md:pb-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
+          {/* ===== Titre + sous-titre + statut ===== */}
+          <div className="lg:hidden mb-6 sm:mb-8 animate-fade-up">
+            <HeroHeading hasReal={hasReal} />
           </div>
 
-          <div className="relative grid lg:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-16 items-center">
-            <div className="relative">
-              <div className="hud-tag mb-7 animate-fade-up">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent-cyan)] opacity-75 animate-ping" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-cyan)]" />
-                </span>
-                Système opérationnel · Modèle v3.1
+          {/* ===== Grille principale 3 colonnes ===== */}
+          <div className="grid lg:grid-cols-[280px_minmax(0,1fr)_280px] xl:grid-cols-[300px_minmax(0,1fr)_300px] gap-4 lg:gap-5 items-start">
+            {/* =========== COLONNE GAUCHE =========== */}
+            <aside className="space-y-4 order-2 lg:order-1 animate-fade-up delay-100">
+              {/* Titre uniquement visible en desktop */}
+              <div className="hidden lg:block mb-2">
+                <HeroHeading hasReal={hasReal} />
               </div>
 
-              <h1 className="font-display text-[2.75rem] sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-[0.95] tracking-tight animate-fade-up delay-100">
-                <span className="block text-gradient-soft">FORGE</span>
-                <span className="block text-gradient-strong text-glow-blue mt-1">
-                  TON CORPS
-                </span>
-                <span className="block text-gradient-soft mt-1">DU FUTUR.</span>
-              </h1>
+              <ProgressionCard value={data.progression} />
+              <CaloriesCard value={data.calories} goal={data.caloriesGoal} />
+              <WorkoutsCard count={data.workouts} />
+              <LevelCard
+                level={data.level}
+                label={data.levelLabel}
+                xp={data.xp}
+                xpMax={data.xpMax}
+              />
+            </aside>
 
-              <p className="mt-7 max-w-xl text-base sm:text-lg md:text-xl text-[var(--text-secondary)] leading-relaxed animate-fade-up delay-200">
-                L&apos;intelligence NEUREX analyse{" "}
-                <span className="text-[var(--accent-cyan)] font-medium">
-                  142 variables physiologiques
-                </span>{" "}
-                pour générer ton programme d&apos;entraînement, ta nutrition et
-                ta progression — calibrés sur ton ADN sportif.
-              </p>
-
-              <div className="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 animate-fade-up delay-300">
-                <Link href="/analyse" className="btn-glow group">
-                  Commencer l&apos;analyse
-                  <ArrowRight />
-                </Link>
-                <a href="#how" className="btn-ghost">
-                  Voir le processus
-                </a>
+            {/* =========== COLONNE CENTRALE — CORPS =========== */}
+            <section className="order-1 lg:order-2 animate-fade-up">
+              <div className="relative">
+                <div className="relative py-4 px-2 sm:px-6 md:px-10 lg:px-14">
+                  <HologramBody />
+                </div>
               </div>
 
-              <div className="mt-12 sm:mt-14 grid grid-cols-3 gap-4 sm:gap-6 max-w-md animate-fade-up delay-400">
-                <Stat value="98%" label="Précision biométrique" />
-                <Stat value="60s" label="Génération complète" />
-                <Stat value="24k+" label="Profils analysés" />
+              {/* Bandeau info sous le corps */}
+              <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+                <InfoChip label="Modèle 3D" value="Actif" status="ok" />
+                <InfoChip label="Précision" value="98,4%" status="ok" />
+                <InfoChip
+                  label="Statut"
+                  value={hasReal ? "Sync" : "Démo"}
+                  status={hasReal ? "ok" : "warn"}
+                />
               </div>
-            </div>
+            </section>
 
-            <div className="relative animate-fade-up delay-300">
-              <HeroSilhouette />
-            </div>
+            {/* =========== COLONNE DROITE =========== */}
+            <aside className="space-y-4 order-3 animate-fade-up delay-200">
+              <MuscleAnalysisCard />
+              <HeartRateCard bpm={data.bpm} />
+              <PerformanceCard value={data.performance} />
+              <NextWorkoutCard
+                name={data.nextWorkout.name}
+                muscles={data.nextWorkout.muscles}
+                href={hasReal ? "/programme" : "/analyse"}
+              />
+            </aside>
           </div>
-        </section>
-
-        {/* ===================== BANDEAU CERTIFICATIONS ===================== */}
-        <section className="relative mx-auto max-w-7xl px-5 sm:px-6 md:px-10 py-10 sm:py-12">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--border-strong)] to-transparent" />
-            <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-[var(--text-tertiary)] text-center">
-              Calibré sur les standards de la performance
-            </span>
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--border-strong)] to-transparent" />
-          </div>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-4 sm:gap-6 opacity-60">
-            {["NSCA", "ACSM", "ISSN", "WHO", "IAAF"].map((label) => (
-              <div
-                key={label}
-                className="text-center font-display text-base sm:text-lg md:text-xl tracking-[0.25em] text-[var(--text-secondary)]"
-              >
-                {label}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ===================== FEATURES ===================== */}
-        <section
-          id="features"
-          className="relative mx-auto max-w-7xl px-5 sm:px-6 md:px-10 py-20 sm:py-24"
-        >
-          <SectionHeader
-            badge="Technologie"
-            title={
-              <>
-                <span className="text-gradient-soft">Une intelligence</span>
-                <br />
-                <span className="text-gradient-strong">
-                  entraînée à te dépasser.
-                </span>
-              </>
-            }
-            description="Trois moteurs d'analyse fonctionnent en parallèle pour modéliser ton corps, ton potentiel et ton plan d'action."
-          />
-
-          <div className="mt-14 sm:mt-16 grid md:grid-cols-3 gap-5">
-            <FeatureCard
-              icon={<IconScan />}
-              title="Analyse biométrique"
-              description="Composition corporelle, métabolisme de base, dépense énergétique et niveau de récupération calculés en temps réel."
-              metric="142 points de données"
-            />
-            <FeatureCard
-              icon={<IconNeural />}
-              title="Moteur neuronal"
-              description="Notre modèle adapte la charge, le tempo et la périodisation à ton historique sportif et ta capacité de progression."
-              metric="3.8M sessions analysées"
-              highlight
-            />
-            <FeatureCard
-              icon={<IconNutrition />}
-              title="Optimisation nutritionnelle"
-              description="Calories, macronutriments et timing alimentaire calibrés sur ton objectif — du cut au bulk en passant par la performance."
-              metric="Précision ±2%"
-            />
-          </div>
-        </section>
-
-        {/* ===================== HOW IT WORKS ===================== */}
-        <section
-          id="how"
-          className="relative mx-auto max-w-7xl px-5 sm:px-6 md:px-10 py-20 sm:py-24"
-        >
-          <SectionHeader
-            badge="Processus"
-            title={
-              <>
-                <span className="text-gradient-soft">Du </span>
-                <span className="text-gradient-strong">scan</span>
-                <span className="text-gradient-soft"> au programme,</span>
-                <br />
-                <span className="text-gradient-soft">en quatre étapes.</span>
-              </>
-            }
-            description="Un protocole conçu pour les athlètes — accessible à n'importe qui."
-          />
-
-          <div className="mt-14 sm:mt-16 grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <StepCard
-              n="01"
-              title="Profil"
-              text="Sexe, âge, morphologie, niveau de forme actuel."
-            />
-            <StepCard
-              n="02"
-              title="Objectif"
-              text="Prise de masse, perte de gras, force, endurance, recomp."
-            />
-            <StepCard
-              n="03"
-              title="Contexte"
-              text="Fréquence d'entraînement, équipement, contraintes."
-            />
-            <StepCard
-              n="04"
-              title="Programme"
-              text="Plan hebdomadaire, nutrition et tracking livrés instantanément."
-            />
-          </div>
-        </section>
-
-        {/* ===================== PERFORMANCE BLOCK ===================== */}
-        <section
-          id="stats"
-          className="relative mx-auto max-w-7xl px-5 sm:px-6 md:px-10 py-20 sm:py-24"
-        >
-          <div className="card-premium p-7 sm:p-10 md:p-16 relative overflow-hidden">
-            <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(0,217,255,0.25),transparent_70%)] blur-2xl" />
-            <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(78,255,243,0.16),transparent_70%)] blur-2xl" />
-            <div className="scan-line" />
-
-            <div className="relative grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
-              <div>
-                <div className="hud-tag mb-6">Performance</div>
-                <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight">
-                  <span className="text-gradient-soft">Plus rapide</span>
-                  <br />
-                  <span className="text-gradient-soft">qu&apos;un coach.</span>
-                  <br />
-                  <span className="text-gradient-strong">Plus précis</span>
-                  <br />
-                  <span className="text-gradient-soft">qu&apos;une intuition.</span>
-                </h2>
-                <p className="mt-6 text-[var(--text-secondary)] text-base sm:text-lg leading-relaxed">
-                  Là où un programme générique te fait perdre des semaines,
-                  NEUREX adapte chaque variable d&apos;entraînement à ta
-                  physiologie unique.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <BigMetric value="3.4×" label="Progression mesurée" />
-                <BigMetric value="–47%" label="Plateaux évités" accent />
-                <BigMetric value="92" label="Score d'adhérence" accent />
-                <BigMetric value="<60s" label="Temps de génération" />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ===================== CTA FINAL ===================== */}
-        <section className="relative mx-auto max-w-5xl px-5 sm:px-6 md:px-10 py-20 sm:py-24 text-center">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,217,255,0.18),transparent_70%)] blur-3xl pointer-events-none" />
-          <h2 className="relative font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight">
-            <span className="text-gradient-soft">TON PROCHAIN NIVEAU</span>
-            <br />
-            <span className="text-gradient-strong text-glow-blue">
-              COMMENCE MAINTENANT.
-            </span>
-          </h2>
-          <p className="relative mt-6 text-base sm:text-lg text-[var(--text-secondary)] max-w-xl mx-auto">
-            60 secondes pour scanner ton profil. Une vie pour transformer ton
-            corps.
-          </p>
-          <div className="relative mt-10">
-            <Link href="/analyse" className="btn-glow text-base">
-              Lancer l&apos;analyse biométrique
-              <ArrowRight />
-            </Link>
-          </div>
-        </section>
+        </div>
       </main>
 
-      <Footer />
+      <MobileTabBar active="home" />
     </>
   );
 }
 
-/* ============== Sub components ============== */
+/* =====================================================
+   Sub components
+   ===================================================== */
 
-function Stat({ value, label }) {
+function HeroHeading({ hasReal }) {
   return (
-    <div className="relative">
-      <div className="font-display text-2xl sm:text-3xl font-bold text-gradient">
-        {value}
+    <div>
+      <div className="hud-tag mb-3 sm:mb-4">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent-cyan)] opacity-75 animate-ping" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-cyan)]" />
+        </span>
+        {hasReal ? "Profil synchronisé" : "Mode démo · v3.1"}
       </div>
-      <div className="mt-1 text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-[0.2em] font-mono">
-        {label}
-      </div>
-      <div className="absolute -left-3 top-1 bottom-1 w-px bg-[var(--accent-blue)]/40 hidden sm:block" />
-    </div>
-  );
-}
-
-function SectionHeader({ badge, title, description }) {
-  return (
-    <div className="max-w-2xl">
-      <div className="hud-tag mb-6">{badge}</div>
-      <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight">
-        {title}
-      </h2>
-      {description && (
-        <p className="mt-5 text-[var(--text-secondary)] text-base sm:text-lg leading-relaxed">
-          {description}
-        </p>
+      <h1 className="font-display text-3xl sm:text-4xl lg:text-[2.5rem] xl:text-5xl font-extrabold leading-[0.95] tracking-tight">
+        <span className="block text-gradient-soft">FORGE</span>
+        <span className="block text-gradient-strong text-glow-blue">
+          TON CORPS.
+        </span>
+      </h1>
+      <p className="mt-3 text-xs sm:text-sm font-tech tracking-[0.18em] uppercase text-[var(--text-secondary)]">
+        Science · Discipline · Performance
+      </p>
+      {!hasReal && (
+        <Link
+          href="/analyse"
+          className="btn-glow mt-5 !py-2.5 !px-4 text-xs"
+        >
+          Lancer mon analyse
+          <ArrowRight />
+        </Link>
       )}
     </div>
   );
 }
 
-function FeatureCard({ icon, title, description, metric, highlight }) {
+function InfoChip({ label, value, status }) {
+  const color =
+    status === "ok"
+      ? "var(--accent-cyan)"
+      : status === "warn"
+        ? "#ffb74d"
+        : "var(--text-tertiary)";
   return (
-    <div
-      className={`card-premium p-7 sm:p-8 group ${highlight ? "border-glow animate-glow-pulse" : ""}`}
-    >
-      <div className="relative mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--accent-blue)]/20 to-[var(--accent-cyan)]/5 border border-[var(--border-strong)] text-[var(--accent-cyan)] group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-        {icon}
-      </div>
-      <h3 className="font-display text-xl font-bold mb-3 tracking-wide">
-        {title}
-      </h3>
-      <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
-        {description}
-      </p>
-      <div className="mt-6 pt-4 border-t border-[var(--border-soft)] font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--accent-cyan)] flex items-center gap-2">
-        <span className="h-1 w-1 rounded-full bg-[var(--accent-cyan)] shadow-[0_0_6px_var(--accent-cyan)]" />
-        {metric}
-      </div>
-    </div>
-  );
-}
-
-function StepCard({ n, title, text }) {
-  return (
-    <div className="relative group">
-      <div className="card-premium p-6 h-full">
-        <div className="flex items-center justify-between mb-4">
-          <span className="font-display text-lg font-bold text-gradient">
-            {n}
-          </span>
-          <div className="h-px flex-1 ml-3 bg-gradient-to-r from-[var(--border-strong)] to-transparent" />
-        </div>
-        <h4 className="font-display text-lg font-bold mb-2 tracking-wide">
-          {title}
-        </h4>
-        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-          {text}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function BigMetric({ value, label, accent }) {
-  return (
-    <div className="relative rounded-xl border border-[var(--border-soft)] bg-[rgba(0,217,255,0.03)] p-5 sm:p-6 backdrop-blur-sm overflow-hidden group hover:border-[var(--accent-blue)]/40 transition-colors">
+    <div className="relative card-premium !rounded-lg !p-3 overflow-hidden">
       <div
-        className={`font-display text-3xl sm:text-4xl md:text-5xl font-extrabold ${
-          accent ? "text-gradient-strong" : "text-white"
-        }`}
-      >
-        {value}
-      </div>
-      <div className="mt-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[var(--text-tertiary)] font-mono">
+        className="absolute left-0 top-0 bottom-0 w-0.5"
+        style={{ background: color, boxShadow: `0 0 6px ${color}` }}
+      />
+      <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--text-tertiary)]">
         {label}
       </div>
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="mt-0.5 font-display text-sm sm:text-base font-bold text-white truncate">
+        {value}
+      </div>
     </div>
   );
 }
-
-/* ============== Icons ============== */
 
 function ArrowRight() {
   return (
     <svg
-      width="16"
-      height="16"
+      width="14"
+      height="14"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2.5"
       strokeLinecap="round"
-      strokeLinejoin="round"
     >
       <path d="M5 12h14M13 5l7 7-7 7" />
-    </svg>
-  );
-}
-
-function IconScan() {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10" />
-    </svg>
-  );
-}
-
-function IconNeural() {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="5" r="2" />
-      <circle cx="5" cy="12" r="2" />
-      <circle cx="19" cy="12" r="2" />
-      <circle cx="12" cy="19" r="2" />
-      <path d="M12 7v10M7 12h10M7 7l10 10M17 7L7 17" />
-    </svg>
-  );
-}
-
-function IconNutrition() {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 2v4M12 22v-4M2 12h4M22 12h-4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3" />
-      <circle cx="12" cy="12" r="3" />
     </svg>
   );
 }

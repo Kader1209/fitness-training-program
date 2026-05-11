@@ -37,7 +37,6 @@ export const metadata = {
   description:
     "Plateforme intelligente de génération de programmes d'entraînement personnalisés. Analyse biométrique avancée, programme optimisé par IA, nutrition et progression sur mesure.",
   applicationName: "NEUREX",
-  themeColor: "#050505",
   keywords: [
     "IA fitness",
     "programme entraînement",
@@ -45,6 +44,12 @@ export const metadata = {
     "musculation IA",
     "nutrition personnalisée",
   ],
+};
+
+export const viewport = {
+  themeColor: "#050505",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }) {

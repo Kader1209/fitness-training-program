@@ -208,37 +208,40 @@ export default function AnalysePage() {
     <>
       <BackgroundFX />
 
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-[rgba(5,5,7,0.6)] border-b border-white/[0.05]">
-        <div className="mx-auto max-w-3xl px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-[rgba(5,5,5,0.7)] border-b border-[var(--border-soft)]">
+        <div className="mx-auto max-w-3xl px-5 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
           <Link
             href="/"
-            className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-white transition-colors"
+            className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-cyan)] transition-colors"
           >
             <ArrowLeft />
-            <span className="font-mono uppercase tracking-widest text-xs">
+            <span className="font-mono uppercase tracking-widest text-[10px] sm:text-xs hidden sm:inline">
               Quitter
             </span>
           </Link>
-          <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-cyan)] animate-pulse" />
-            NEUREX · Analyse biométrique
+          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-tertiary)] flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inset-0 rounded-full bg-[var(--accent-cyan)] animate-ping opacity-60" />
+              <span className="relative rounded-full h-2 w-2 bg-[var(--accent-cyan)]" />
+            </span>
+            <span className="hidden sm:inline">NEUREX ·</span> Analyse biométrique
           </div>
-          <div className="font-mono text-xs text-[var(--text-secondary)]">
+          <div className="font-mono text-xs sm:text-sm text-white font-bold">
             {String(Math.min(stepIndex + 1, STEPS.length)).padStart(2, "0")}
-            <span className="text-[var(--text-tertiary)]">
+            <span className="text-[var(--text-tertiary)] font-normal">
               /{String(STEPS.length).padStart(2, "0")}
             </span>
           </div>
         </div>
         {/* Barre de progression futuriste */}
-        <div className="relative h-1 w-full bg-white/[0.04]">
+        <div className="relative h-1 w-full bg-[rgba(0,217,255,0.05)]">
           <div
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-[var(--accent-cyan)] to-[var(--accent-green)] transition-all duration-700 ease-out"
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] transition-all duration-700 ease-out shadow-[0_0_12px_var(--accent-blue)]"
             style={{ width: `${progress}%` }}
           />
           <div
-            className="absolute inset-y-0 w-12 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm transition-all duration-700"
-            style={{ left: `calc(${progress}% - 24px)` }}
+            className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-white/60 to-transparent blur-sm transition-all duration-700"
+            style={{ left: `calc(${progress}% - 32px)` }}
           />
         </div>
       </header>
@@ -251,23 +254,22 @@ export default function AnalysePage() {
             key={stepIndex}
             className="w-full max-w-2xl animate-fade-up"
           >
-            <div className="card-premium p-8 md:p-12 relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent-cyan)]/40 to-transparent" />
+            <div className="card-premium p-6 sm:p-8 md:p-12 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-transparent shadow-[0_0_12px_var(--accent-blue)]" />
 
-              <div className="flex items-center gap-2 mb-6">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--accent-cyan)]">
+              <div className="flex flex-wrap items-center gap-2 mb-6">
+                <span className="hud-tag">
                   Étape {String(stepIndex + 1).padStart(2, "0")}
                 </span>
-                <span className="text-[var(--text-tertiary)]">·</span>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-tertiary)]">
-                  Données {step.key}
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-tertiary)]">
+                  Données · {step.key}
                 </span>
               </div>
 
-              <h1 className="font-display text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-gradient-soft">
+              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight tracking-tight text-gradient-soft">
                 {step.title}
               </h1>
-              <p className="mt-3 text-[var(--text-secondary)]">
+              <p className="mt-3 text-[var(--text-secondary)] text-sm sm:text-base">
                 {step.subtitle}
               </p>
 
@@ -280,16 +282,19 @@ export default function AnalysePage() {
                         <button
                           key={String(opt.value)}
                           onClick={() => handleSelect(opt.value)}
-                          className={`group relative text-left p-5 rounded-2xl border transition-all duration-300 ${
+                          className={`group relative text-left p-4 sm:p-5 rounded-xl border transition-all duration-300 overflow-hidden ${
                             active
-                              ? "border-[var(--accent-cyan)] bg-[rgba(0,229,255,0.06)] shadow-[0_0_0_4px_rgba(0,229,255,0.08)]"
-                              : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]"
+                              ? "border-[var(--accent-blue)] bg-[rgba(0,217,255,0.08)] shadow-[0_0_0_2px_rgba(0,217,255,0.12),0_0_24px_rgba(0,217,255,0.25)]"
+                              : "border-[var(--border-soft)] bg-white/[0.02] hover:border-[var(--border-strong)] hover:bg-[rgba(0,217,255,0.04)]"
                           }`}
                         >
+                          {active && (
+                            <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--accent-cyan)] shadow-[0_0_8px_var(--accent-cyan)]" />
+                          )}
                           <div className="flex items-start gap-3">
                             {opt.icon && (
                               <span
-                                className={`text-2xl font-display ${
+                                className={`text-2xl font-display font-bold ${
                                   active
                                     ? "text-[var(--accent-cyan)]"
                                     : "text-white/60"
@@ -299,20 +304,20 @@ export default function AnalysePage() {
                               </span>
                             )}
                             <div className="flex-1">
-                              <div className="font-display text-lg font-semibold text-white">
+                              <div className="font-display text-base sm:text-lg font-bold text-white tracking-wide">
                                 {opt.label}
                               </div>
                               {opt.desc && (
-                                <div className="mt-1 text-sm text-[var(--text-secondary)]">
+                                <div className="mt-1 text-xs sm:text-sm text-[var(--text-secondary)]">
                                   {opt.desc}
                                 </div>
                               )}
                             </div>
                             <div
-                              className={`mt-1 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                              className={`mt-1 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ${
                                 active
-                                  ? "border-[var(--accent-cyan)] bg-[var(--accent-cyan)]"
-                                  : "border-white/20"
+                                  ? "border-[var(--accent-blue)] bg-[var(--accent-cyan)]"
+                                  : "border-[var(--border-strong)]"
                               }`}
                             >
                               {active && (
@@ -384,21 +389,21 @@ function NumberField({ step, value, onChange }) {
           max={step.max}
           value={v}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full appearance-none h-2 rounded-full bg-white/10 outline-none cursor-pointer slider-premium"
+          className="w-full appearance-none h-2 rounded-full outline-none cursor-pointer slider-premium"
           style={{
-            background: `linear-gradient(to right, var(--accent-cyan) 0%, var(--accent-green) ${
+            background: `linear-gradient(to right, var(--accent-blue) 0%, var(--accent-cyan) ${
               ((v - step.min) / (step.max - step.min)) * 100
-            }%, rgba(255,255,255,0.08) ${
+            }%, rgba(0,217,255,0.08) ${
               ((v - step.min) / (step.max - step.min)) * 100
-            }%, rgba(255,255,255,0.08) 100%)`,
+            }%, rgba(0,217,255,0.08) 100%)`,
           }}
         />
       </div>
 
-      <div className="flex items-center justify-center gap-4">
+      <div className="flex items-center justify-center gap-3 sm:gap-4">
         <button
           onClick={() => onChange(Math.max(step.min, v - 1))}
-          className="h-12 w-12 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-colors text-xl"
+          className="h-11 w-11 sm:h-12 sm:w-12 rounded-full border border-[var(--border-strong)] bg-[rgba(0,217,255,0.04)] hover:bg-[rgba(0,217,255,0.1)] hover:border-[var(--accent-blue)] hover:text-[var(--accent-cyan)] transition-all text-xl font-bold"
           aria-label="Diminuer"
         >
           −
@@ -410,27 +415,27 @@ function NumberField({ step, value, onChange }) {
             max={step.max}
             value={v}
             onChange={(e) => onChange(Number(e.target.value))}
-            className="bg-transparent border-none outline-none font-display text-6xl md:text-7xl font-semibold text-gradient text-center w-32 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="bg-transparent border-none outline-none font-display text-5xl sm:text-6xl md:text-7xl font-extrabold text-gradient-strong text-center w-28 sm:w-32 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
-          <span className="font-mono text-lg text-[var(--text-tertiary)]">
+          <span className="font-mono text-base sm:text-lg text-[var(--text-tertiary)] uppercase tracking-widest">
             {step.suffix}
           </span>
         </div>
         <button
           onClick={() => onChange(Math.min(step.max, v + 1))}
-          className="h-12 w-12 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-colors text-xl"
+          className="h-11 w-11 sm:h-12 sm:w-12 rounded-full border border-[var(--border-strong)] bg-[rgba(0,217,255,0.04)] hover:bg-[rgba(0,217,255,0.1)] hover:border-[var(--accent-blue)] hover:text-[var(--accent-cyan)] transition-all text-xl font-bold"
           aria-label="Augmenter"
         >
           +
         </button>
       </div>
 
-      <div className="flex justify-between text-xs font-mono text-[var(--text-tertiary)]">
+      <div className="flex justify-between text-[10px] sm:text-xs font-mono text-[var(--text-tertiary)] uppercase tracking-widest">
         <span>
-          {step.min} {step.suffix}
+          MIN · {step.min} {step.suffix}
         </span>
         <span>
-          {step.max} {step.suffix}
+          MAX · {step.max} {step.suffix}
         </span>
       </div>
     </div>
@@ -440,30 +445,32 @@ function NumberField({ step, value, onChange }) {
 /* ============== LOADER IA ============== */
 function LoaderAI({ message, idx }) {
   return (
-    <div className="w-full max-w-xl text-center animate-fade-in">
-      <div className="relative mx-auto h-48 w-48 mb-10">
-        <div className="absolute inset-0 rounded-full border border-[var(--accent-cyan)]/30 animate-spin-slow" />
-        <div className="absolute inset-3 rounded-full border border-[var(--accent-green)]/20 animate-spin-slow [animation-direction:reverse] [animation-duration:8s]" />
+    <div className="w-full max-w-xl text-center animate-fade-in px-4">
+      <div className="relative mx-auto h-44 w-44 sm:h-48 sm:w-48 mb-8 sm:mb-10">
+        <div className="absolute inset-0 rounded-full border border-[var(--accent-blue)]/40 animate-spin-slow shadow-[0_0_24px_rgba(0,217,255,0.25)]" />
+        <div className="absolute inset-3 rounded-full border border-[var(--accent-cyan)]/30 animate-spin-slow [animation-direction:reverse] [animation-duration:8s]" />
         <div className="absolute inset-6 rounded-full border-2 border-dashed border-white/10 animate-spin-slow [animation-duration:20s]" />
-        <div className="absolute inset-10 rounded-full bg-[radial-gradient(circle,rgba(0,229,255,0.4),transparent_70%)] blur-xl animate-pulse-glow" />
+        <div className="absolute inset-10 rounded-full bg-[radial-gradient(circle,rgba(0,217,255,0.55),transparent_70%)] blur-xl animate-pulse-glow" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="font-display text-3xl font-bold text-gradient">
+          <div className="font-display text-3xl sm:text-4xl font-extrabold text-gradient-strong">
             {String(Math.round(((idx + 1) / 8) * 100)).padStart(2, "0")}%
           </div>
         </div>
       </div>
 
-      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--accent-cyan)] mb-3">
+      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--accent-cyan)] mb-3 flex items-center justify-center gap-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-cyan)] animate-hud-blink" />
         Moteur NEUREX · Calcul en cours
+        <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-cyan)] animate-hud-blink" />
       </div>
       <h2
         key={message}
-        className="font-display text-2xl md:text-3xl font-semibold text-gradient-soft animate-fade-in min-h-[60px]"
+        className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-gradient-soft animate-fade-in min-h-[60px] tracking-wide"
       >
         {message}
       </h2>
 
-      <div className="mt-10 max-w-md mx-auto space-y-2">
+      <div className="mt-8 sm:mt-10 max-w-md mx-auto space-y-2.5">
         {[
           "Profil biométrique",
           "Capacité de travail",
@@ -478,30 +485,30 @@ function LoaderAI({ message, idx }) {
               className="flex items-center gap-3 text-left font-mono text-xs"
             >
               <div
-                className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                className={`h-2 w-2 rounded-sm transition-colors ${
                   done
-                    ? "bg-[var(--accent-green)]"
+                    ? "bg-[var(--accent-cyan)] shadow-[0_0_6px_var(--accent-cyan)]"
                     : active
-                      ? "bg-[var(--accent-cyan)] animate-pulse"
-                      : "bg-white/20"
+                      ? "bg-[var(--accent-blue)] animate-pulse shadow-[0_0_6px_var(--accent-blue)]"
+                      : "bg-white/15"
                 }`}
               />
               <span
-                className={
+                className={`uppercase tracking-widest ${
                   done || active
                     ? "text-white"
                     : "text-[var(--text-tertiary)]"
-                }
+                }`}
               >
                 {label}
               </span>
               <div className="flex-1 h-px bg-white/5" />
               <span
-                className={`uppercase tracking-widest text-[10px] ${
+                className={`uppercase tracking-[0.2em] text-[10px] font-bold ${
                   done
-                    ? "text-[var(--accent-green)]"
+                    ? "text-[var(--accent-cyan)]"
                     : active
-                      ? "text-[var(--accent-cyan)]"
+                      ? "text-[var(--accent-blue)]"
                       : "text-[var(--text-tertiary)]"
                 }`}
               >

@@ -161,9 +161,9 @@ export function generateProgram(profile) {
 
   // ====== Niveau physique estimé ======
   const physicalLevel = {
-    beginner: { label: "Apprenti", grade: "C+", color: "#4d8cff" },
-    intermediate: { label: "Confirmé", grade: "A-", color: "#00e5ff" },
-    advanced: { label: "Athlète", grade: "S", color: "#00ff9d" },
+    beginner: { label: "Apprenti", grade: "C+", color: "#0099cc" },
+    intermediate: { label: "Confirmé", grade: "A-", color: "#00d9ff" },
+    advanced: { label: "Athlète", grade: "S", color: "#4efff3" },
   }[level];
 
   // ====== Objectif détecté ======

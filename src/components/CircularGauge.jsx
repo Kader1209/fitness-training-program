@@ -21,8 +21,8 @@ export default function CircularGauge({
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id={`grad-${label}`} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#00e5ff" />
-            <stop offset="100%" stopColor="#00ff9d" />
+            <stop offset="0%" stopColor="#00d9ff" />
+            <stop offset="100%" stopColor="#4efff3" />
           </linearGradient>
         </defs>
         <circle
@@ -43,7 +43,7 @@ export default function CircularGauge({
           strokeLinecap="round"
           strokeDasharray={`${dash} ${circumference}`}
           style={{
-            filter: "drop-shadow(0 0 8px rgba(0, 229, 255, 0.5))",
+            filter: "drop-shadow(0 0 10px rgba(0, 217, 255, 0.7))",
             transition: "stroke-dasharray 1s ease",
           }}
         />
